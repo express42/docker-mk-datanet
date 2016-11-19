@@ -1,0 +1,28 @@
+version: '2'
+services:
+  postgres:
+    build: ./jpetstore-db/
+    restart: always
+    environment:
+      POSTGRES_USER: jpetstore
+      POSTGRES_PASSWORD: jpetstore
+      POSTGRES_DB: jpetstore
+      PGDATA: /var/lib/postgresql/data/pgdata
+  tomcat:
+    build: ./jpetstore/
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      CATALINA_BASE:   /usr/local/tomcat
+      CATALINA_HOME:   /usr/local/tomcat
+      CATALINA_TMPDIR: /usr/local/tomcat/temp
+      JRE_HOME:        /usr
+      CLASSPATH:       /usr/local/tomcat/bin/bootstrap.jar:/usr/local/tomcat/bin/tomcat-juli.jar
+  nginx:
+    build: ./balancer/
+    depends_on:
+      - tomcat
+    restart: always
+    ports:
+      - "80:80"
